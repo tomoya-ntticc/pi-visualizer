@@ -1,3 +1,4 @@
+import './style.css'
 import p5, { Color } from "p5";
 
 /** バブルの情報を定義する型 */
