@@ -2,9 +2,7 @@ import './style.css'
 import pi_string from './pi_one_million.txt?raw'
 import p5, { Color } from "p5";
 
-/** バブルの情報を定義する型 */
-type Pixcel = {
-  /** 位置（画面サイズに対する0〜1の相対位置） */
+type Pixel = {
   pos: {
     x: number;
     y: number;
@@ -27,13 +25,21 @@ const sketch = (p: p5) => {
     return pi_string.split("").slice(start, end).map(s => parseInt(s, 10));
   }
 
+  const rotate_PI = (PI: number[]) => {
+    const first = PI.shift();
+    if (first != undefined) {
+      PI.push(first);
+    }
+    return PI
+  }
+
   const PIXEL_SIZE = 11;
   let PI = get_PI(0, get_max_number(PIXEL_SIZE, "x") * get_max_number(PIXEL_SIZE, "y"));
 
-  const CENTER_DOT_SIZE = 1;
+  const CENTER_DOT_SIZE = 3;
   const BG_COLOR = "#171d21";
   const DIGIT_COLORS = ["#ffffff", "#ffa500", "#ffff00", "#008000", "#006400", "#191970", "#dda0dd", "#b22222", "#f0e68c", "#000000"];
-  const pixels: Pixcel[] = [];
+  let pixels: Pixel[] = [];
 
   let isFullscreen = false;
 
@@ -58,6 +64,7 @@ const sketch = (p: p5) => {
 
   /** 初期化処理 */
   p.setup = () => {
+    p.frameRate(10);
     p.createCanvas(p.windowWidth, p.windowHeight);
   };
 
@@ -65,7 +72,9 @@ const sketch = (p: p5) => {
   p.draw = () => {
     p.push();
     p.background(p.color(BG_COLOR));
-    // p.blendMode(p.SCREEN);
+    rotate_PI(PI)
+    console.log("PI.length:" + PI.length);
+    pixels = [];
     for (const [index, number] of PI.entries()) {
       const x_pos = (index % get_max_number(PIXEL_SIZE, "x")) * PIXEL_SIZE
       const y_pos = Math.floor(index / get_max_number(PIXEL_SIZE, "x")) * PIXEL_SIZE;
@@ -79,6 +88,9 @@ const sketch = (p: p5) => {
     if (p.key == "f") {
       isFullscreen = !isFullscreen
       p.fullscreen(isFullscreen)
+    }
+    if (p.key == "i") {
+      PI = get_PI(0, get_max_number(PIXEL_SIZE, "x") * get_max_number(PIXEL_SIZE, "y"))
     }
   }
 
