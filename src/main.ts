@@ -42,6 +42,7 @@ const sketch = (p: p5) => {
   let pixels: Pixel[] = [];
 
   let isFullscreen = false;
+  let hiddenCenterDot = false;
 
   const addPixel = (number: number, x: number, y: number) => {
     pixels.push({
@@ -57,8 +58,10 @@ const sketch = (p: p5) => {
     pixels.forEach((pixel) => {
       p.fill(pixel.color);
       p.rect(pixel.pos.x, pixel.pos.y, PIXEL_SIZE, PIXEL_SIZE);
-      p.fill(BG_COLOR);
-      p.rect(pixel.pos.x + Math.floor((PIXEL_SIZE - CENTER_DOT_SIZE)/2), pixel.pos.y + Math.floor((PIXEL_SIZE - CENTER_DOT_SIZE)/2), CENTER_DOT_SIZE, CENTER_DOT_SIZE)
+      if (!hiddenCenterDot) {
+        p.fill(BG_COLOR);
+        p.rect(pixel.pos.x + Math.floor((PIXEL_SIZE - CENTER_DOT_SIZE) / 2), pixel.pos.y + Math.floor((PIXEL_SIZE - CENTER_DOT_SIZE) / 2), CENTER_DOT_SIZE, CENTER_DOT_SIZE);
+      }
     })
   }
 
@@ -92,6 +95,10 @@ const sketch = (p: p5) => {
     if (p.key == "i") {
       PI = get_PI(0, get_max_number(PIXEL_SIZE, "x") * get_max_number(PIXEL_SIZE, "y"))
     }
+  }
+
+  p.touchEnded = () => {
+    hiddenCenterDot = !hiddenCenterDot;
   }
 
   p.windowResized = () => {
