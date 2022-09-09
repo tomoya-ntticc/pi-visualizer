@@ -2,6 +2,8 @@ import './style.css'
 import pi_string from './pi_one_million.txt?raw'
 import p5, { Color } from "p5";
 
+const isDebug = false;
+
 type Pixel = {
   pos: {
     x: number;
@@ -12,6 +14,28 @@ type Pixel = {
 };
 
 const sketch = (p: p5) => {
+  const frameRates = [1, 2, 5, 10, 20, 30, 60]
+  let currentFrameRate = 5;
+
+  let isFullscreen = false;
+  let hiddenCenterDot = false;
+
+  const PIXEL_SIZE = 11;
+  const CENTER_DOT_SIZE = 3;
+  const BG_COLOR = "#171d21";
+  const DIGIT_COLORS = [
+    [255, 255, 255],
+    [255, 195, 0],
+    [255, 255, 0],
+    [0, 255, 0],
+    [0, 120, 10],
+    [0, 0, 255],
+    [160, 50, 255],
+    [255, 0, 100],
+    [255, 175, 175],
+    [0, 0, 0]
+  ];
+
   const get_max_number = (PIXEL_SIZE: number, x_or_y: string) => {
     if (x_or_y == "x") {
       return Math.floor(p.windowWidth / PIXEL_SIZE)
@@ -33,27 +57,8 @@ const sketch = (p: p5) => {
     return PI
   }
 
-  const PIXEL_SIZE = 11;
   let PI = get_PI(0, get_max_number(PIXEL_SIZE, "x") * get_max_number(PIXEL_SIZE, "y"));
-
-  const CENTER_DOT_SIZE = 3;
-  const BG_COLOR = "#171d21";
-  const DIGIT_COLORS = [
-    [255, 255, 255],
-    [255, 195, 0],
-    [255, 255, 0],
-    [0, 255, 0],
-    [0, 120, 10],
-    [0, 0, 255],
-    [160, 50, 255],
-    [255, 0, 100],
-    [255, 175, 175],
-    [0, 0, 0]
-  ];
   let pixels: Pixel[] = [];
-
-  let isFullscreen = false;
-  let hiddenCenterDot = false;
 
   const addPixel = (number: number, x: number, y: number) => {
     pixels.push({
@@ -77,7 +82,7 @@ const sketch = (p: p5) => {
 
   /** 初期化処理 */
   p.setup = () => {
-    p.frameRate(10);
+    p.frameRate(frameRates[currentFrameRate]);
     p.createCanvas(p.windowWidth, p.windowHeight);
   };
 
@@ -86,7 +91,7 @@ const sketch = (p: p5) => {
     p.push();
     p.background(p.color(BG_COLOR));
     rotate_PI(PI)
-    console.log("PI.length:" + PI.length);
+    // console.log("PI.length:" + PI.length);
     pixels = [];
     for (const [index, number] of PI.entries()) {
       const x_pos = (index % get_max_number(PIXEL_SIZE, "x")) * PIXEL_SIZE
@@ -95,6 +100,9 @@ const sketch = (p: p5) => {
     }
     drawPixels()
     p.pop();
+    if (isDebug) {
+      console.log("framerate: " + p.frameRate());
+    }
   };
 
   p.keyReleased = () => {
@@ -108,7 +116,13 @@ const sketch = (p: p5) => {
   }
 
   p.touchEnded = () => {
-    hiddenCenterDot = !hiddenCenterDot;
+    if (currentFrameRate < frameRates.length) {
+      currentFrameRate++;
+    }
+    else {
+      currentFrameRate = 0;
+    }
+    p.frameRate(frameRates[currentFrameRate]);
   }
 
   p.windowResized = () => {
