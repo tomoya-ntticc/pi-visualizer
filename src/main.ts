@@ -2,7 +2,7 @@ import './style.css'
 import pi_string from './pi_one_million.txt?raw'
 import p5, { Color } from "p5";
 
-const isDebug = false;
+const isDebug = true;
 
 type Pixel = {
   pos: {
@@ -14,14 +14,13 @@ type Pixel = {
 };
 
 const sketch = (p: p5) => {
-  const frameRates = [1, 2, 5, 10, 20, 30, 60]
-  let currentFrameRate = 5;
-
   let isFullscreen = false;
   let hiddenCenterDot = false;
 
-  const PIXEL_SIZE = 21;
-  const CENTER_DOT_SIZE = 5;
+
+  const PIXEL_SIZES = [11, 21, 31];
+  const CENTER_DOT_SIZES = [3, 5, 7];
+  let current_size = 0;
   const BG_COLOR = "#171d21";
   const DIGIT_COLORS = [
     [255, 255, 255],
@@ -38,10 +37,10 @@ const sketch = (p: p5) => {
 
   const get_max_number = (PIXEL_SIZE: number, x_or_y: string) => {
     if (x_or_y == "x") {
-      return Math.floor(p.windowWidth / PIXEL_SIZE)
+      return Math.floor(p.windowWidth / PIXEL_SIZES[current_size])
     }
     else {
-      return Math.floor(p.windowHeight / PIXEL_SIZE)
+      return Math.floor(p.windowHeight / PIXEL_SIZES[current_size])
     }
   }
 
@@ -57,7 +56,7 @@ const sketch = (p: p5) => {
     return PI
   }
 
-  let PI = get_PI(0, get_max_number(PIXEL_SIZE, "x") * get_max_number(PIXEL_SIZE, "y"));
+  let PI = get_PI(0, get_max_number(PIXEL_SIZES[current_size], "x") * get_max_number(PIXEL_SIZES[current_size], "y"));
   let pixels: Pixel[] = [];
 
   const addPixel = (number: number, x: number, y: number) => {
@@ -72,17 +71,17 @@ const sketch = (p: p5) => {
     p.noStroke();
     pixels.forEach((pixel) => {
       p.fill(pixel.color);
-      p.rect(pixel.pos.x, pixel.pos.y, PIXEL_SIZE, PIXEL_SIZE);
+      p.rect(pixel.pos.x, pixel.pos.y, PIXEL_SIZES[current_size], PIXEL_SIZES[current_size]);
       if (!hiddenCenterDot) {
         p.fill(BG_COLOR);
-        p.rect(pixel.pos.x + Math.floor((PIXEL_SIZE - CENTER_DOT_SIZE) / 2), pixel.pos.y + Math.floor((PIXEL_SIZE - CENTER_DOT_SIZE) / 2), CENTER_DOT_SIZE, CENTER_DOT_SIZE);
+        p.rect(pixel.pos.x + Math.floor((PIXEL_SIZES[current_size] - CENTER_DOT_SIZES[current_size]) / 2), pixel.pos.y + Math.floor((PIXEL_SIZES[current_size] - CENTER_DOT_SIZES[current_size]) / 2), CENTER_DOT_SIZES[current_size], CENTER_DOT_SIZES[current_size]);
       }
     })
   }
 
   /** 初期化処理 */
   p.setup = () => {
-    p.frameRate(frameRates[currentFrameRate]);
+    p.frameRate(60);
     p.createCanvas(p.windowWidth, p.windowHeight);
   };
 
@@ -91,17 +90,16 @@ const sketch = (p: p5) => {
     p.push();
     p.background(p.color(BG_COLOR));
     rotate_PI(PI)
-    // console.log("PI.length:" + PI.length);
     pixels = [];
     for (const [index, number] of PI.entries()) {
-      const x_pos = (index % get_max_number(PIXEL_SIZE, "x")) * PIXEL_SIZE
-      const y_pos = Math.floor(index / get_max_number(PIXEL_SIZE, "x")) * PIXEL_SIZE;
+      const x_pos = (index % get_max_number(PIXEL_SIZES[current_size], "x")) * PIXEL_SIZES[current_size]
+      const y_pos = Math.floor(index / get_max_number(PIXEL_SIZES[current_size], "x")) * PIXEL_SIZES[current_size];
       addPixel(number, x_pos, y_pos)
     }
     drawPixels()
     p.pop();
     if (isDebug) {
-      console.log("framerate: " + p.frameRate());
+      console.log("PI.length:" + PI.length + ", framerate: " + p.frameRate());
     }
   };
 
@@ -111,23 +109,22 @@ const sketch = (p: p5) => {
       p.fullscreen(isFullscreen)
     }
     if (p.key == "i") {
-      PI = get_PI(0, get_max_number(PIXEL_SIZE, "x") * get_max_number(PIXEL_SIZE, "y"))
+      PI = get_PI(0, get_max_number(PIXEL_SIZES[current_size], "x") * get_max_number(PIXEL_SIZES[current_size], "y"))
     }
   }
 
   p.touchEnded = () => {
-    if (currentFrameRate < frameRates.length) {
-      currentFrameRate++;
+    if (current_size < PIXEL_SIZES.length) {
+      current_size++;
     }
     else {
-      currentFrameRate = 0;
+      current_size = 0;
     }
-    p.frameRate(frameRates[currentFrameRate]);
   }
 
   p.windowResized = () => {
     p.resizeCanvas(p.windowWidth, p.windowHeight);
-    PI = get_PI(0, get_max_number(PIXEL_SIZE, "x") * get_max_number(PIXEL_SIZE, "y"));
+    PI = get_PI(0, get_max_number(PIXEL_SIZES[current_size], "x") * get_max_number(PIXEL_SIZES[current_size], "y"));
     p.background(p.color(BG_COLOR));
   };
 };
