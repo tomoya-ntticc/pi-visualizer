@@ -20,8 +20,8 @@ const sketch = (p: p5) => {
   let isFullscreen = false;
   let hiddenCenterDot = false;
 
-  const PIXEL_SIZE = 11;
-  const CENTER_DOT_SIZE = 3;
+  const PIXEL_SIZE = 21;
+  const CENTER_DOT_SIZE = 5;
   const BG_COLOR = "#171d21";
   const DIGIT_COLORS = [
     [255, 255, 255],
