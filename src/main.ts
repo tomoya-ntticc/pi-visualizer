@@ -38,7 +38,18 @@ const sketch = (p: p5) => {
 
   const CENTER_DOT_SIZE = 3;
   const BG_COLOR = "#171d21";
-  const DIGIT_COLORS = ["#ffffff", "#ffa500", "#ffff00", "#008000", "#006400", "#191970", "#dda0dd", "#b22222", "#f0e68c", "#000000"];
+  const DIGIT_COLORS = [
+    [255, 255, 255],
+    [255, 195, 0],
+    [255, 255, 0],
+    [0, 255, 0],
+    [0, 120, 10],
+    [0, 0, 255],
+    [160, 50, 255],
+    [255, 0, 100],
+    [255, 175, 175],
+    [0, 0, 0]
+  ];
   let pixels: Pixel[] = [];
 
   let isFullscreen = false;
@@ -50,7 +61,6 @@ const sketch = (p: p5) => {
       number: number,
       color: p.color(DIGIT_COLORS[number])
     })
-
   }
 
   const drawPixels = () => {
