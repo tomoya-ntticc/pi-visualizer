@@ -15,14 +15,14 @@ type Pixel = {
 };
 
 const sketch = (p: p5) => {
-  let canvas_x = 510; // p.windowWidth
-  let canvas_y = 510; // p.swindowHeight
+  let canvas_x = 1920; // p.windowWidth
+  let canvas_y = 1080; // p.windowHeight
   let isFullscreen = false;
   let hiddenCenterDot = false;
 
-  const PIXEL_SIZES = [11, 21, 31, 51];
-  const CENTER_DOT_SIZES = [3, 5, 7, 11];
-  let current_size = 3;
+  const PIXEL_SIZES = [9, 11, 21, 31, 51];
+  const CENTER_DOT_SIZES = [3, 3, 5, 7, 11];
+  let current_size = 2;
   const BG_COLOR = "#171d21";
   const DIGIT_COLORS = [
     [255, 255, 255],
@@ -38,11 +38,24 @@ const sketch = (p: p5) => {
   ];
 
   const get_max_number = (PIXEL_SIZE: number, x_or_y: string) => {
+    let max_number;
     if (x_or_y == "x") {
-      return Math.floor(canvas_x / PIXEL_SIZES[current_size])
+      max_number = Math.floor(canvas_x / PIXEL_SIZES[current_size]);
+      if (128 < max_number) {
+        return 128;
+      }
+      else {
+        return max_number;
+      }
     }
     else {
-      return Math.floor(canvas_y / PIXEL_SIZES[current_size])
+      max_number = Math.floor(canvas_y / PIXEL_SIZES[current_size]);
+      if (96 < max_number) {
+        return 96;
+      }
+      else {
+        return max_number;
+      }
     }
   }
 
@@ -58,10 +71,13 @@ const sketch = (p: p5) => {
     return PI
   }
 
-  let max_x_number = get_max_number(PIXEL_SIZES[current_size], "x");
-  let max_y_number = get_max_number(PIXEL_SIZES[current_size], "y");
+  let max_x_number = 68; //128; //get_max_number(PIXEL_SIZES[current_size], "x");
+  let max_y_number = 51; //96; //get_max_number(PIXEL_SIZES[current_size], "y");
   let max_digit = max_x_number * max_y_number
   let currentDigit = 0;
+
+  let offset_x = (canvas_x - (PIXEL_SIZES[current_size] * max_x_number)) / 2;
+  let offset_y = (canvas_y - (PIXEL_SIZES[current_size] * max_y_number)) / 2;
 
   let PI = get_PI(0, max_digit);
 
@@ -89,29 +105,30 @@ const sketch = (p: p5) => {
 
   /** 初期化処理 */
   p.setup = () => {
-    p.frameRate(10);
+    p.frameRate(5);
     p.createCanvas(canvas_x, canvas_y);
   };
 
   /** フレームごとの描画処理 */
   p.draw = () => {
-    if (currentDigit < max_digit) {
+    if (currentDigit < 300) {//max_digit) {
       p.push();
       p.background(p.color(BG_COLOR));
-      rotate_PI(PI)
       pixels = [];
       for (const [index, number] of PI.entries()) {
-        const x_pos = (index % max_x_number) * PIXEL_SIZES[current_size]
-        const y_pos = Math.floor(index / max_x_number) * PIXEL_SIZES[current_size];
+        const x_pos = (index % max_x_number) * PIXEL_SIZES[current_size] + offset_x
+        const y_pos = Math.floor(index / max_x_number) * PIXEL_SIZES[current_size] + offset_y;
         addPixel(number, x_pos, y_pos)
       }
       drawPixels()
+      p.translate(50, 50);
       p.pop();
       if (isExporting) {
         let filename = "pi-" + ('00000' + currentDigit).slice(-5) + ".png";
         p.save(filename);
         console.log("exported " + filename);
       }
+      rotate_PI(PI)
       currentDigit++;
     }
     else {
@@ -129,6 +146,7 @@ const sketch = (p: p5) => {
     }
     if (p.key == "i") {
       PI = get_PI(0, max_digit);
+      currentDigit = 0;
     }
     if (p.key == "s") {
       PI = get_PI(0, max_digit);
