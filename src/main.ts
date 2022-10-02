@@ -1,20 +1,24 @@
 import './style.css'
 import pi_string from './pi_one_million.txt?raw'
+import settings_json from './settings.json'
 import p5 from "p5";
 
 const sketch = (p: p5) => {
-  let frame_rate = 30;
+  let is_debug = false;
+
+  let frame_rate = settings_json.frame_rate;
   let canvas_x = p.windowWidth
   let canvas_y = p.windowHeight
   let isFullscreen = false;
 
-  let line_width = 100;
+  let line_width = settings_json.line_width;
   let line_height = p.windowHeight;
-  let x_position = 1050;
+  let x_position = settings_json.x_position;
   let y_position = 0;
+  const variances = [1, 10, 100];
+  let currentVariance = 0;
 
   let max_digit = 432000;
-  const BG_COLOR = "#171d21";
   const DIGIT_COLORS = [
     [255, 255, 255],
     [255, 195, 0],
@@ -42,32 +46,114 @@ const sketch = (p: p5) => {
     return arranged_pi
   }
 
+  const draw_text = () => {
+    let info_text = `line_width: ${line_width}\nx_position: ${x_position}\nframe_rate: ${frame_rate}\n\nvariance: ${variances[currentVariance]}`;
+    p.textAlign(p.LEFT, p.TOP);
+    p.fill("#FFFFFF")
+    p.textSize(50);
+    p.text(info_text, 10, 10);
+    console.info(info_text);
+  }
+
+  const load_settings = () => {
+    p.frameRate(settings_json.frame_rate);
+    x_position = settings_json.x_position;
+    line_width = settings_json.line_width;
+  }
+
+  const save_settings = () => {
+    p.createStringDict({
+      frame_rate: frame_rate,
+      x_position: x_position,
+      line_width: line_width
+    }).saveJSON()
+  }
+
   let currentDigit = 0;
   let pi = arrange(get_PI(0, max_digit));
 
   p.setup = () => {
-    p.frameRate(frame_rate);
     p.createCanvas(canvas_x, canvas_y);
+    load_settings();
   };
 
   p.draw = () => {
     p.push();
-    p.background(p.color(BG_COLOR));
+    p.background(p.color(DIGIT_COLORS[10]));
     p.fill(p.color(DIGIT_COLORS[pi[currentDigit]]));
     p.rect(x_position, y_position, line_width, line_height);
     p.pop();
+
+    if (is_debug) {
+      draw_text();
+    }
 
     currentDigit++;
   };
 
   p.keyReleased = () => {
-    if (p.key == "f") {
-      isFullscreen = !isFullscreen;
-      p.fullscreen(isFullscreen);
+    is_debug = true;
+
+    switch (p.key) {
+      case "d":
+        is_debug = !is_debug;
+        break;
+      case "f":
+        isFullscreen = !isFullscreen;
+        p.fullscreen(isFullscreen);
+        is_debug = false;
+        break;
+      case "i":
+        pi = arrange(get_PI(0, max_digit));
+        currentDigit = 0;
+        is_debug = false;
+        break;
+      case "r":
+        frame_rate += variances[currentVariance];
+        if (120 < frame_rate) {
+          frame_rate = 1;
+        }
+        p.frameRate(frame_rate);
+        break;
+      case "v":
+        currentVariance++;
+        if (variances.length <= currentVariance) {
+          currentVariance = 0;
+        }
+        break;
+      case "l":
+        load_settings();
+        break;
+      case "s":
+        save_settings();
+        break;
     }
-    if (p.key == "i") {
-      pi = arrange(get_PI(0, max_digit));
-      currentDigit = 0;
+
+    switch (p.keyCode) {
+      case p.UP_ARROW:
+        line_width += variances[currentVariance];
+        if (p.windowWidth < line_width) {
+          line_width = p.windowWidth;
+        }
+        break;
+      case p.DOWN_ARROW:
+        line_width -= variances[currentVariance];
+        if (line_width < 1) {
+          line_width = 1;
+        }
+        break;
+      case p.LEFT_ARROW:
+        x_position -= variances[currentVariance];
+        if (x_position < 0) {
+          x_position = 0;
+        }
+        break;
+      case p.RIGHT_ARROW:
+        x_position += variances[currentVariance];
+        if (p.windowWidth < x_position) {
+          x_position = p.windowWidth;
+        }
+        break;
     }
   }
 
