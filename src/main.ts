@@ -62,9 +62,11 @@ const sketch = (p: p5) => {
   }
 
   const load_settings = () => {
-    p.frameRate(settings_json.frame_rate);
+    frame_rate = settings_json.frame_rate;
     x_position = settings_json.x_position;
     line_width = settings_json.line_width;
+
+    p.frameRate(frame_rate);
   }
 
   const save_settings = () => {
