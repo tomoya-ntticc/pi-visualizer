@@ -47,7 +47,13 @@ const sketch = (p: p5) => {
   }
 
   const draw_text = () => {
-    let info_text = `line_width: ${line_width}\nx_position: ${x_position}\nframe_rate: ${frame_rate}\n\nvariance: ${variances[currentVariance]}`;
+    let info_text = `
+      line_width: ${line_width}
+      x_position: ${x_position}
+      frame_rate: ${frame_rate}
+      current_frame_rate: ${p.round(p.frameRate())}\n
+      variance: ${variances[currentVariance]}
+    `;
     p.textAlign(p.LEFT, p.TOP);
     p.fill("#FFFFFF")
     p.textSize(50);
