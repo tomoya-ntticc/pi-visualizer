@@ -80,6 +80,8 @@ const sketch = (p: p5) => {
 
   p.setup = () => {
     p.createCanvas(canvas_x, canvas_y);
+    p.frameRate(120);
+
     load_settings();
   };
 
