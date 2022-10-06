@@ -95,7 +95,7 @@ const sketch = (p: p5) => {
     p.push();
     p.background(p.color(DIGIT_COLORS[10]));
     p.fill(p.color(DIGIT_COLORS[pi[currentDigit]]));
-    p.quad(x_position, y_position, x_position + line_width, 0, x_position + line_width, line_height, x_position, line_height - y_position);
+    p.quad(x_position, y_position, x_position + line_width, 0, x_position + line_width, line_height, x_position, line_height - y_position - 58);
     p.pop();
 
     if (is_debug) {
