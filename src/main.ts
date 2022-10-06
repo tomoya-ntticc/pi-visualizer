@@ -14,11 +14,11 @@ const sketch = (p: p5) => {
   let line_width = settings_json.line_width;
   let line_height = p.windowHeight;
   let x_position = settings_json.x_position;
-  let y_position = 0;
+  let y_position = settings_json.y_position;;
   const variances = [1, 10, 100];
   let currentVariance = 0;
 
-  let max_digit = 432000;
+  let max_digit = 1000000; //432000;
   const DIGIT_COLORS = [
     [255, 255, 255],
     [255, 195, 0],
@@ -48,10 +48,11 @@ const sketch = (p: p5) => {
 
   const draw_text = () => {
     let info_text = `
-      line_width: ${line_width}
-      x_position: ${x_position}
       frame_rate: ${frame_rate}
       current_frame_rate: ${p.round(p.frameRate())}\n
+      line_width: ${line_width}
+      x_position: ${x_position}
+      y_position: ${y_position}\n
       variance: ${variances[currentVariance]}
     `;
     p.textAlign(p.LEFT, p.TOP);
@@ -63,8 +64,9 @@ const sketch = (p: p5) => {
 
   const load_settings = () => {
     frame_rate = settings_json.frame_rate;
-    x_position = settings_json.x_position;
     line_width = settings_json.line_width;
+    x_position = settings_json.x_position;
+    y_position = settings_json.y_position;
 
     p.frameRate(frame_rate);
   }
@@ -72,8 +74,9 @@ const sketch = (p: p5) => {
   const save_settings = () => {
     p.createStringDict({
       frame_rate: frame_rate,
+      line_width: line_width,
       x_position: x_position,
-      line_width: line_width
+      y_position: y_position,
     }).saveJSON()
   }
 
@@ -92,7 +95,7 @@ const sketch = (p: p5) => {
     p.push();
     p.background(p.color(DIGIT_COLORS[10]));
     p.fill(p.color(DIGIT_COLORS[pi[currentDigit]]));
-    p.rect(x_position, y_position, line_width, line_height);
+    p.quad(x_position, y_position, x_position + line_width, 0, x_position + line_width, line_height, x_position, line_height - y_position);
     p.pop();
 
     if (is_debug) {
@@ -106,7 +109,7 @@ const sketch = (p: p5) => {
     is_debug = true;
 
     switch (p.key) {
-      case "d":
+      case "h":
         is_debug = !is_debug;
         break;
       case "f":
@@ -120,9 +123,9 @@ const sketch = (p: p5) => {
         is_debug = false;
         break;
       case "r":
-        frame_rate += variances[currentVariance];
+        frame_rate += 5;
         if (120 < frame_rate) {
-          frame_rate = 1;
+          frame_rate = 5;
         }
         p.frameRate(frame_rate);
         break;
@@ -130,6 +133,18 @@ const sketch = (p: p5) => {
         currentVariance++;
         if (variances.length <= currentVariance) {
           currentVariance = 0;
+        }
+        break;
+      case "<":
+        line_width -= variances[currentVariance];
+        if (line_width < 1) {
+          line_width = 1;
+        }
+        break;
+      case ">":
+        line_width += variances[currentVariance];
+        if (p.windowWidth < line_width) {
+          line_width = p.windowWidth;
         }
         break;
       case "l":
@@ -142,15 +157,15 @@ const sketch = (p: p5) => {
 
     switch (p.keyCode) {
       case p.UP_ARROW:
-        line_width += variances[currentVariance];
-        if (p.windowWidth < line_width) {
-          line_width = p.windowWidth;
+        y_position -= variances[currentVariance];
+        if (y_position < 0) {
+          y_position = 0;
         }
         break;
       case p.DOWN_ARROW:
-        line_width -= variances[currentVariance];
-        if (line_width < 1) {
-          line_width = 1;
+        y_position += variances[currentVariance];
+        if (p.windowHeight < y_position) {
+          y_position = p.windowHeight;
         }
         break;
       case p.LEFT_ARROW:

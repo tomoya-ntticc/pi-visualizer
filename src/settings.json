@@ -1,5 +1,6 @@
 {
     "frame_rate": 30,
+    "line_width": 100,
     "x_position": 1050,
-    "line_width": 100
+    "y_position": 10
 }
